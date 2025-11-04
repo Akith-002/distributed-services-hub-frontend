@@ -2,11 +2,7 @@ import "./App.css";
 import ChatRoom from "./components/ChatRoom";
 
 function App() {
-  return (
-    <>
-      <ChatRoom />
-    </>
-  );
+  return <ChatRoom />;
 }
 
 export default App;
