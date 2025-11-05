@@ -1,5 +1,4 @@
 import "./App.css";
-import ChatRoom from "./components/ChatRoom";
 import ChatRoomEnhanced from "./components/ChatRoomEnhanced";
 
 function App() {

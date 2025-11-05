@@ -1,39 +1,34 @@
-import React, { useEffect, useRef, useState } from "react";
-import "./ChatRoom.css";
+import { useEffect, useRef, useState } from 'react';
+import LoginScreen from './Login.jsx';
+import MessagesPanel from './MessagesPanel.jsx';
+import MessageInput from './MessageInput.jsx';
+import UploadModal from './UploadModal.jsx';
 
-/**
- * Enhanced ChatRoom component with SSL/TLS support and additional features
- * - Configurable WebSocket URL (ws:// or wss://)
- * - Message timestamps
- * - Typing indicators
- * - File upload support
- * - Error handling
- * - Message history
- * 
- * @author Member 3 - Full Stack Development
- * @version 2.0
- */
 export default function ChatRoom() {
   const [messages, setMessages] = useState([]);
-  const [username, setUsername] = useState("");
-  const [text, setText] = useState("");
+  const [username, setUsername] = useState('');
+  const [text, setText] = useState('');
   const [isConnected, setIsConnected] = useState(false);
   const [users, setUsers] = useState([]);
   const [typingUsers, setTypingUsers] = useState([]);
   const [error, setError] = useState(null);
-  const [useSSL, setUseSSL] = useState(true); // Member 3: SSL/TLS enabled by default (Javalin 5.x + Jetty SSL connector)
-  
+  const [useSSL, setUseSSL] = useState(true);
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [uploadMessage, setUploadMessage] = useState('');
+  const [isUploading, setIsUploading] = useState(false);
+
   const ws = useRef(null);
   const messagesEndRef = useRef(null);
   const reconnectAttemptsRef = useRef(0);
   const shouldReconnect = useRef(false);
   const typingTimeoutRef = useRef(null);
+  const fileInputRef = useRef(null);
   const maxReconnectAttempts = 6;
 
-  // Determine WebSocket URL based on SSL setting
   const getWebSocketUrl = () => {
-    const protocol = useSSL ? "wss" : "ws";
-    const port = useSSL ? "7443" : "7070";
+    const protocol = useSSL ? 'wss' : 'ws';
+    const port = useSSL ? '7443' : '7070';
     return `${protocol}://localhost:${port}/chat`;
   };
 
@@ -43,7 +38,7 @@ export default function ChatRoom() {
       try {
         ws.current.close();
       } catch (e) {
-        console.warn("Error closing existing websocket:", e);
+        console.warn('Error closing existing websocket:', e);
       }
       ws.current = null;
     }
@@ -59,23 +54,22 @@ export default function ChatRoom() {
     }
 
     ws.current.onopen = () => {
-      console.log("✅ Connected to WebSocket");
+      console.log('✅ Connected to WebSocket');
       reconnectAttemptsRef.current = 0;
       setIsConnected(true);
       setError(null);
       shouldReconnect.current = true;
-      
-      // Send JOIN immediately
+
       try {
         ws.current.send(
           JSON.stringify({
-            type: "JOIN",
+            type: 'JOIN',
             payload: { username: name },
           })
         );
       } catch (err) {
-        console.error("Failed to send JOIN:", err);
-        setError("Failed to join chat");
+        console.error('Failed to send JOIN:', err);
+        setError('Failed to join chat');
       }
     };
 
@@ -84,40 +78,37 @@ export default function ChatRoom() {
       try {
         msg = JSON.parse(event.data);
       } catch (err) {
-        console.error("Invalid JSON from server:", event.data, err);
+        console.error('Invalid JSON from server:', event.data, err);
         return;
       }
 
-      // Handle different message types
       switch (msg.type) {
-        case "USER_LIST_UPDATE":
+        case 'USER_LIST_UPDATE':
           setUsers(Array.isArray(msg.payload?.users) ? msg.payload.users : []);
           break;
-        
-        case "TYPING":
+
+        case 'TYPING':
           handleTypingIndicator(msg.payload?.username, true);
           break;
-        
-        case "STOP_TYPING":
+
+        case 'STOP_TYPING':
           handleTypingIndicator(msg.payload?.username, false);
           break;
-        
-        case "ERROR":
-          setError(msg.payload?.text || "An error occurred");
+
+        case 'ERROR':
+          setError(msg.payload?.text || 'An error occurred');
           break;
-        
+
         default:
-          // Add message to chat (MESSAGE, SYSTEM, etc.)
           setMessages((prev) => [...prev, msg]);
           break;
       }
     };
 
     ws.current.onclose = (ev) => {
-      console.log("❌ Disconnected from WebSocket", ev.code, ev.reason);
+      console.log('❌ Disconnected from WebSocket', ev.code, ev.reason);
       setIsConnected(false);
-      
-      // Attempt reconnect with exponential backoff if desired
+
       if (shouldReconnect.current) {
         const attempt = reconnectAttemptsRef.current + 1;
         reconnectAttemptsRef.current = attempt;
@@ -126,20 +117,20 @@ export default function ChatRoom() {
           console.log(`Reconnecting attempt ${attempt} in ${backoff}ms`);
           setTimeout(() => connectWebSocket(name), backoff);
         } else {
-          setError("Max reconnect attempts reached. Please refresh the page.");
+          setError('Max reconnect attempts reached. Please refresh the page.');
         }
       }
     };
 
     ws.current.onerror = (err) => {
-      console.error("⚠️ WebSocket error:", err);
-      setError("WebSocket connection error");
+      console.error('⚠️ WebSocket error:', err);
+      setError('WebSocket connection error');
     };
   };
 
   const handleTypingIndicator = (user, isTyping) => {
-    if (user === username) return; // Don't show own typing indicator
-    
+    if (user === username) return;
+
     setTypingUsers((prev) => {
       if (isTyping) {
         return prev.includes(user) ? prev : [...prev, user];
@@ -151,7 +142,7 @@ export default function ChatRoom() {
 
   const handleJoin = () => {
     if (!username.trim()) {
-      alert("Please enter a username!");
+      alert('Please enter a username!');
       return;
     }
     reconnectAttemptsRef.current = 0;
@@ -162,27 +153,30 @@ export default function ChatRoom() {
 
   const sendMessage = () => {
     if (!text.trim()) return;
-    
-    const out = JSON.stringify({ type: "MESSAGE", payload: { text } });
+
+    const out = JSON.stringify({ type: 'MESSAGE', payload: { text } });
     try {
       if (ws.current && ws.current.readyState === WebSocket.OPEN) {
         ws.current.send(out);
-        setText("");
+        setText('');
         sendStopTyping();
       } else {
-        setError("Not connected. Message not sent.");
+        setError('Not connected. Message not sent.');
       }
     } catch (err) {
-      console.error("Failed to send message", err);
-      setError("Failed to send message");
+      console.error('Failed to send message', err);
+      setError('Failed to send message');
     }
   };
 
   const handleTextChange = (e) => {
     setText(e.target.value);
-    
-    // Send typing indicator
-    if (e.target.value && ws.current && ws.current.readyState === WebSocket.OPEN) {
+
+    if (
+      e.target.value &&
+      ws.current &&
+      ws.current.readyState === WebSocket.OPEN
+    ) {
       sendTyping();
     }
   };
@@ -191,14 +185,13 @@ export default function ChatRoom() {
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current);
     }
-    
+
     try {
-      ws.current.send(JSON.stringify({ type: "TYPING", payload: {} }));
+      ws.current.send(JSON.stringify({ type: 'TYPING', payload: {} }));
     } catch (err) {
-      console.error("Failed to send typing indicator", err);
+      console.error('Failed to send typing indicator', err);
     }
-    
-    // Auto stop typing after 3 seconds
+
     typingTimeoutRef.current = setTimeout(() => {
       sendStopTyping();
     }, 3000);
@@ -209,13 +202,13 @@ export default function ChatRoom() {
       clearTimeout(typingTimeoutRef.current);
       typingTimeoutRef.current = null;
     }
-    
+
     try {
       if (ws.current && ws.current.readyState === WebSocket.OPEN) {
-        ws.current.send(JSON.stringify({ type: "STOP_TYPING", payload: {} }));
+        ws.current.send(JSON.stringify({ type: 'STOP_TYPING', payload: {} }));
       }
     } catch (err) {
-      console.error("Failed to send stop typing indicator", err);
+      console.error('Failed to send stop typing indicator', err);
     }
   };
 
@@ -236,13 +229,69 @@ export default function ChatRoom() {
   };
 
   const handleKeyPress = (e) => {
-    if (e.key === "Enter" && !e.shiftKey) {
+    if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       sendMessage();
     }
   };
 
-  // Cleanup connection when leaving the page
+  const handleUploadClick = () => {
+    setShowUploadModal(true);
+    setUploadMessage('');
+    setSelectedFile(null);
+  };
+
+  const handleFileSelect = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setSelectedFile(file);
+      setUploadMessage('');
+    }
+  };
+
+  const handleFileUpload = async () => {
+    if (!selectedFile) {
+      setUploadMessage('Please select a file!');
+      return;
+    }
+
+    setIsUploading(true);
+    const formData = new FormData();
+    formData.append('username', username);
+    formData.append('file', selectedFile);
+
+    try {
+      const protocol = useSSL ? 'https' : 'http';
+      const port = useSSL ? '7443' : '7070';
+      const response = await fetch(`${protocol}://localhost:${port}/upload`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setUploadMessage(`✅ ${data.message}`);
+        setTimeout(() => {
+          setShowUploadModal(false);
+          setSelectedFile(null);
+        }, 2000);
+      } else {
+        const errorText = await response.text();
+        setUploadMessage(`❌ Upload failed: ${errorText}`);
+      }
+    } catch (error) {
+      setUploadMessage(`❌ Error: ${error.message}`);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const closeModal = () => {
+    setShowUploadModal(false);
+    setSelectedFile(null);
+    setUploadMessage('');
+  };
+
   useEffect(() => {
     return () => {
       if (ws.current) ws.current.close();
@@ -250,162 +299,115 @@ export default function ChatRoom() {
     };
   }, []);
 
-  // Autoscroll on new messages
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Login Screen
   if (!isConnected) {
     return (
-      <div className="login-container">
-        <div className="login-box">
-          <h2>💬 Secure WebSocket Chat</h2>
-          <p className="subtitle">Enter your username to join</p>
-          
-          <input
-            type="text"
-            placeholder="Enter your username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            onKeyPress={(e) => e.key === "Enter" && handleJoin()}
-            className="login-input"
-            autoFocus
-          />
-          
-          <div className="ssl-toggle">
-            <label>
-              <input
-                type="checkbox"
-                checked={useSSL}
-                onChange={(e) => setUseSSL(e.target.checked)}
-              />
-              <span className="ssl-label">
-                {useSSL ? "🔒 SSL/TLS Enabled (wss://)" : "⚠️ SSL/TLS Disabled (ws://)"}
-              </span>
-            </label>
-          </div>
-          
-          {error && <div className="error-message">{error}</div>}
-          
-          <button onClick={handleJoin} className="join-button">
-            Join Chat
-          </button>
-          
-          <div className="info-text">
-            {useSSL ? (
-              <>
-                <p>🔐 Connecting via secure WebSocket (WSS)</p>
-                <p>Port: 7443</p>
-              </>
-            ) : (
-              <>
-                <p>⚠️ Connecting via unsecured WebSocket (WS)</p>
-                <p>Port: 7070</p>
-              </>
-            )}
-          </div>
-        </div>
-      </div>
+      <LoginScreen
+        username={username}
+        setUsername={setUsername}
+        useSSL={useSSL}
+        setUseSSL={setUseSSL}
+        error={error}
+        onJoin={handleJoin}
+      />
     );
   }
 
-  // Chat Room
   return (
-    <div className="chat-container">
-      <div className="chat-header">
-        <h2>💬 Secure WebSocket Chat</h2>
-        <div className="header-info">
-          <span className="username-badge">👤 {username}</span>
-          <span className="ssl-badge">
-            {useSSL ? "🔒 SSL/TLS" : "⚠️ No SSL"}
-          </span>
-          <button onClick={handleDisconnect} className="disconnect-button">
-            Disconnect
-          </button>
+    <div className="h-screen flex flex-col bg-gray-100">
+      {/* Chat Header */}
+      <div className="bg-linear-to-r from-blue-600 to-indigo-600 text-white px-6 py-4 shadow-lg">
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-bold">💬 Secure Chat</h2>
+          <div className="flex items-center gap-4">
+            <span className="bg-white/20 px-3 py-1 rounded-full text-sm">
+              👤 {username}
+            </span>
+            <span className="bg-white/20 px-3 py-1 rounded-full text-sm">
+              {useSSL ? '🔒 SSL' : '⚠️ No SSL'}
+            </span>
+            <button
+              onClick={handleDisconnect}
+              className="bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+            >
+              Disconnect
+            </button>
+          </div>
         </div>
       </div>
 
-      {error && <div className="error-banner">{error}</div>}
+      {error && (
+        <div className="bg-red-50 border-b border-red-200 text-red-700 px-6 py-3 text-sm">
+          {error}
+        </div>
+      )}
 
-      <div className="chat-main">
+      <div className="flex flex-1 overflow-hidden">
         {/* Users Panel */}
-        <div className="users-panel">
-          <h4>Online Users ({users.length})</h4>
-          <div className="users-list">
+        <div className="w-64 bg-white border-r border-gray-200 flex flex-col">
+          <div className="px-4 py-3 border-b border-gray-200 bg-gray-50">
+            <h4 className="font-semibold text-gray-700">
+              Online Users ({users.length})
+            </h4>
+          </div>
+          <div className="flex-1 overflow-y-auto p-2">
             {users.length === 0 ? (
-              <div className="no-users">No users online</div>
+              <div className="text-center text-gray-500 text-sm py-4">
+                No users online
+              </div>
             ) : (
               users.map((u) => (
-                <div key={u} className={`user-item ${u === username ? "current-user" : ""}`}>
-                  <span className="user-status">🟢</span>
-                  {u}
-                  {u === username && <span className="you-badge">(you)</span>}
+                <div
+                  key={u}
+                  className={`flex items-center gap-2 px-3 py-2 rounded-lg mb-1 ${
+                    u === username ? 'bg-blue-50' : 'hover:bg-gray-50'
+                  }`}
+                >
+                  <span className="text-green-500">🟢</span>
+                  <span className="text-sm font-medium text-gray-700">{u}</span>
+                  {u === username && (
+                    <span className="ml-auto text-xs text-blue-600 font-medium">
+                      (you)
+                    </span>
+                  )}
                 </div>
               ))
             )}
           </div>
         </div>
 
-        {/* Messages Panel */}
-        <div className="messages-panel">
-          <div className="messages-container">
-            {messages.map((msg, i) => {
-              const isOwnMessage = msg.payload?.username === username;
-              const isSystem = msg.type === "SYSTEM";
+        <div className="flex-1 flex flex-col">
+          <MessagesPanel
+            messages={messages}
+            typingUsers={typingUsers}
+            currentUsername={username}
+            messagesEndRef={messagesEndRef}
+          />
 
-              return (
-                <div
-                  key={i}
-                  className={`message-wrapper ${
-                    isSystem ? "system" : isOwnMessage ? "own" : "other"
-                  }`}
-                >
-                  <div className="message-bubble">
-                    {!isSystem && !isOwnMessage && (
-                      <div className="message-sender">{msg.payload?.username}</div>
-                    )}
-                    <div className="message-text">{msg.payload?.text}</div>
-                    {msg.timestamp && (
-                      <div className="message-time">{msg.timestamp}</div>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-            
-            {/* Typing Indicators */}
-            {typingUsers.length > 0 && (
-              <div className="typing-indicator">
-                <span className="typing-text">
-                  {typingUsers.join(", ")} {typingUsers.length === 1 ? "is" : "are"} typing
-                </span>
-                <span className="typing-dots">
-                  <span>.</span><span>.</span><span>.</span>
-                </span>
-              </div>
-            )}
-            
-            <div ref={messagesEndRef} />
-          </div>
-
-          {/* Message Input */}
-          <div className="message-input-container">
-            <input
-              type="text"
-              placeholder="Type a message..."
-              value={text}
-              onChange={handleTextChange}
-              onKeyPress={handleKeyPress}
-              onBlur={sendStopTyping}
-              className="message-input"
-            />
-            <button onClick={sendMessage} className="send-button" disabled={!text.trim()}>
-              Send
-            </button>
-          </div>
+          <MessageInput
+            text={text}
+            onTextChange={handleTextChange}
+            onSend={sendMessage}
+            onKeyPress={handleKeyPress}
+            onBlur={sendStopTyping}
+            onUploadClick={handleUploadClick}
+          />
         </div>
       </div>
+
+      <UploadModal
+        show={showUploadModal}
+        selectedFile={selectedFile}
+        uploadMessage={uploadMessage}
+        isUploading={isUploading}
+        onClose={closeModal}
+        onFileSelect={handleFileSelect}
+        onUpload={handleFileUpload}
+        fileInputRef={fileInputRef}
+      />
     </div>
   );
 }
