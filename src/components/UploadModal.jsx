@@ -57,7 +57,6 @@ export default function UploadModal({
             ) : (
               <div>
                 <p className="text-gray-600 mb-2">Click to select a file</p>
-                <p className="text-xs text-gray-500">or drag and drop here</p>
               </div>
             )}
 
@@ -70,7 +69,7 @@ export default function UploadModal({
 
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="mt-4 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors text-sm font-medium"
+              className="mt-4 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg transition-colors text-sm font-medium"
             >
               Choose File
             </button>

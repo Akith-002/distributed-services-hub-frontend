@@ -11,7 +11,7 @@ export default function LoginScreen({
       <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
         <div className="text-center mb-8">
           <h2 className="text-3xl font-bold text-gray-800 mb-2">
-            💬 Secure Chat
+            FIT Chat
           </h2>
           <p className="text-gray-600">Enter your username to join</p>
         </div>
@@ -35,8 +35,8 @@ export default function LoginScreen({
           />
           <span className="text-sm font-medium">
             {useSSL
-              ? '🔒 SSL/TLS Enabled (wss://)'
-              : '⚠️ SSL/TLS Disabled (ws://)'}
+              ? 'SSL/TLS Enabled (wss://)'
+              : 'SSL/TLS Disabled (ws://)'}
           </span>
         </label>
 
@@ -56,11 +56,11 @@ export default function LoginScreen({
         <div className="mt-6 text-center text-sm text-gray-500">
           {useSSL ? (
             <>
-              <p>🔐 Secure WebSocket (WSS) • Port: 7443</p>
+              <p>Secure WebSocket (WSS) • Port: 7443</p>
             </>
           ) : (
             <>
-              <p>⚠️ Unsecured WebSocket (WS) • Port: 7070</p>
+              <p>Unsecured WebSocket (WS) • Port: 7070</p>
             </>
           )}
         </div>

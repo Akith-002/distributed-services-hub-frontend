@@ -2,44 +2,58 @@ function MessageBubble({ message, currentUsername }) {
   const isOwnMessage = message.payload?.username === currentUsername;
   const isSystem = message.type === 'SYSTEM';
 
+  function formatTime(timestamp) {
+    if (!timestamp) return '';
+    const [hour, minute] = timestamp.split(':');
+    const date = new Date();
+    date.setHours(hour, minute);
+    return date.toLocaleTimeString([], {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+    });
+  }
+
+  const baseClasses = 'max-w-md px-4 rounded-2xl';
+  const systemStyles = 'bg-gray-200 py-1 text-gray-700 text-sm rounded-lg';
+  const ownMessageStyles = 'bg-blue-600 py-2 text-white rounded-br-sm';
+  const otherMessageStyles = 'bg-white py-2 text-gray-800 rounded-bl-sm shadow-sm';
+
+  let bubbleClasses = '';
+  let alignmentClasses = '';
+
+  if (isSystem) {
+    bubbleClasses = `${baseClasses} ${systemStyles}`;
+    alignmentClasses = 'justify-center';
+  } else if (isOwnMessage) {
+    bubbleClasses = `${baseClasses} ${ownMessageStyles}`;
+    alignmentClasses = 'justify-end';
+  } else {
+    bubbleClasses = `${baseClasses} ${otherMessageStyles}`;
+    alignmentClasses = 'justify-start';
+  }
+
   return (
-    <div
-      className={`flex ${
-        isSystem
-          ? 'justify-center'
-          : isOwnMessage
-          ? 'justify-end'
-          : 'justify-start'
-      }`}
-    >
-      <div
-        className={`max-w-md ${
-          isSystem
-            ? 'bg-gray-200 text-gray-700 px-4 py-2 rounded-full text-sm'
-            : isOwnMessage
-            ? 'bg-blue-600 text-white rounded-2xl rounded-br-sm px-4 py-2'
-            : 'bg-white rounded-2xl rounded-bl-sm px-4 py-2 shadow-sm'
-        }`}
-      >
+    <div className={`flex ${alignmentClasses}`}>
+      <div className={bubbleClasses}>
+        {/* Display username only for other users */}
         {!isSystem && !isOwnMessage && (
           <div className="text-xs font-semibold text-blue-600 mb-1">
             {message.payload?.username}
           </div>
         )}
-        <div
-          className={`text-sm ${
-            isSystem ? '' : isOwnMessage ? 'text-white' : 'text-gray-800'
-          }`}
-        >
-          {message.payload?.text}
-        </div>
-        {message.timestamp && (
+
+        {/* Message text */}
+        <div className="text-sm">{message.payload?.text}</div>
+
+        {/* Timestamp - shown only for non-system messages */}
+        {!isSystem && message.timestamp && (
           <div
             className={`text-xs mt-1 ${
               isOwnMessage ? 'text-blue-100' : 'text-gray-500'
             }`}
           >
-            {message.timestamp}
+            {formatTime(message.timestamp)}
           </div>
         )}
       </div>

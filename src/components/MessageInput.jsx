@@ -1,10 +1,10 @@
-import { Paperclip } from 'lucide-react';
+import { Paperclip, SendHorizontal } from 'lucide-react';
 
 export default function MessageInput({
   text,
   onTextChange,
   onSend,
-  onKeyPress,
+  onKeyDown,
   onBlur,
   onUploadClick,
 }) {
@@ -24,7 +24,7 @@ export default function MessageInput({
           placeholder="Type a message..."
           value={text}
           onChange={onTextChange}
-          onKeyPress={onKeyPress}
+          onKeyDown={onKeyDown}
           onBlur={onBlur}
           className="flex-1 px-4 py-2 border-2 border-gray-200 rounded-full focus:border-blue-500 focus:outline-none"
         />
@@ -32,9 +32,9 @@ export default function MessageInput({
         <button
           onClick={onSend}
           disabled={!text.trim()}
-          className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white px-6 py-2 rounded-full font-medium transition-colors"
+          className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white px-3 py-3 rounded-full font-medium transition-colors"
         >
-          Send
+          <SendHorizontal />
         </button>
       </div>
     </div>

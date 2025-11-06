@@ -44,7 +44,7 @@ export default function App() {
     }
 
     const wsUrl = getWebSocketUrl();
-    console.log(`🔗 Connecting to ${wsUrl}...`);
+    console.log(`Connecting to ${wsUrl}...`);
 
     try {
       ws.current = new WebSocket(wsUrl);
@@ -54,7 +54,7 @@ export default function App() {
     }
 
     ws.current.onopen = () => {
-      console.log('✅ Connected to WebSocket');
+      console.log('Connected to WebSocket');
       reconnectAttemptsRef.current = 0;
       setIsConnected(true);
       setError(null);
@@ -106,7 +106,7 @@ export default function App() {
     };
 
     ws.current.onclose = (ev) => {
-      console.log('❌ Disconnected from WebSocket', ev.code, ev.reason);
+      console.log('Disconnected from WebSocket', ev.code, ev.reason);
       setIsConnected(false);
 
       if (shouldReconnect.current) {
@@ -123,7 +123,7 @@ export default function App() {
     };
 
     ws.current.onerror = (err) => {
-      console.error('⚠️ WebSocket error:', err);
+      console.error('WebSocket error:', err);
       setError('WebSocket connection error');
     };
   };
@@ -228,7 +228,7 @@ export default function App() {
     setTypingUsers([]);
   };
 
-  const handleKeyPress = (e) => {
+  const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       sendMessage();
@@ -274,7 +274,7 @@ export default function App() {
         setTimeout(() => {
           setShowUploadModal(false);
           setSelectedFile(null);
-        }, 2000);
+        }, 1500);
       } else {
         const errorText = await response.text();
         setUploadMessage(`❌ Upload failed: ${errorText}`);
@@ -321,13 +321,13 @@ export default function App() {
       {/* Chat Header */}
       <div className="bg-linear-to-r from-blue-600 to-indigo-600 text-white px-6 py-4 shadow-lg">
         <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold">💬 Secure Chat</h2>
+          <h2 className="text-2xl font-bold">FIT Chat</h2>
           <div className="flex items-center gap-4">
             <span className="bg-white/20 px-3 py-1 rounded-full text-sm">
-              👤 {username}
+              {username}
             </span>
             <span className="bg-white/20 px-3 py-1 rounded-full text-sm">
-              {useSSL ? '🔒 SSL' : '⚠️ No SSL'}
+              {useSSL ? 'SSL' : 'No SSL'}
             </span>
             <button
               onClick={handleDisconnect}
@@ -347,7 +347,7 @@ export default function App() {
 
       <div className="flex flex-1 overflow-hidden">
         {/* Users Panel */}
-        <div className="w-64 bg-white border-r border-gray-200 flex flex-col">
+        <div className="w-100 bg-white border-r border-gray-200 flex flex-col">
           <div className="px-4 py-3 border-b border-gray-200 bg-gray-50">
             <h4 className="font-semibold text-gray-700">
               Online Users ({users.length})
@@ -366,8 +366,8 @@ export default function App() {
                     u === username ? 'bg-blue-50' : 'hover:bg-gray-50'
                   }`}
                 >
-                  <span className="text-green-500">🟢</span>
                   <span className="text-sm font-medium text-gray-700">{u}</span>
+                  <span className="text-green-500">🟢</span>
                   {u === username && (
                     <span className="ml-auto text-xs text-blue-600 font-medium">
                       (you)
@@ -391,7 +391,7 @@ export default function App() {
             text={text}
             onTextChange={handleTextChange}
             onSend={sendMessage}
-            onKeyPress={handleKeyPress}
+            onKeyDown={handleKeyDown}
             onBlur={sendStopTyping}
             onUploadClick={handleUploadClick}
           />
