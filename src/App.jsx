@@ -99,6 +99,22 @@ export default function App() {
           setError(msg.payload?.text || 'An error occurred');
           break;
 
+        case 'FILE_UPLOAD':
+          setMessages((prev) => [
+            ...prev,
+            {
+              type: 'FILE_UPLOAD',
+              payload: {
+                filename: msg.payload.filename,
+                username: msg.payload.username,
+                url: msg.payload.url,
+                filesize: msg.payload.filesize,
+              },
+              timestamp: msg.timestamp || new Date().toLocaleTimeString(),
+            },
+          ]);
+          break;
+
         default:
           setMessages((prev) => [...prev, msg]);
           break;
