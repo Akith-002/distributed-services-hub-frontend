@@ -61,7 +61,7 @@ function MessageBubble({ message, currentUsername }) {
 
             {/* File info */}
             <div className="flex-1 mr-10">
-              <div className="font-medium text-gray-900 dark:text-gray-100 truncate">
+              <div className="font-medium text-gray-100 truncate">
                 {filename}
               </div>
               <div className="text-xs text-gray-100 truncate">{extension}  {filesize}</div>
