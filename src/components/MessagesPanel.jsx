@@ -1,3 +1,5 @@
+import { Download, File } from 'lucide-react';
+
 function MessageBubble({ message, currentUsername }) {
   const isOwnMessage = message.payload?.username === currentUsername;
   const isSystem = message.type === 'SYSTEM';
@@ -15,6 +17,13 @@ function MessageBubble({ message, currentUsername }) {
     });
   }
 
+  // --- Extract file info ---
+  const filename = message.payload?.filename || 'Unknown file';
+  const filesize = message.payload?.filesize || '—';
+  const fileUrl = message.payload?.url || '#';
+  const extension = filename.split('.').pop()?.toUpperCase() || 'FILE';
+
+  // --- Base bubble styles ---
   const baseClasses = 'max-w-md px-4 rounded-2xl';
   const systemStyles = 'bg-gray-200 py-1 text-gray-700 text-sm rounded-lg';
   const ownMessageStyles = 'bg-blue-600 py-2 text-white rounded-br-sm';
@@ -36,9 +45,9 @@ function MessageBubble({ message, currentUsername }) {
   }
 
   return (
-    <div className={`flex ${alignmentClasses}`}>
+    <div className={`flex ${alignmentClasses} my-1`}>
       <div className={bubbleClasses}>
-        {/* Display username only for other users */}
+        {/* Username for other users */}
         {!isSystem && !isOwnMessage && (
           <div className="text-xs font-semibold text-blue-600 mb-1">
             {message.payload?.username}
@@ -47,20 +56,33 @@ function MessageBubble({ message, currentUsername }) {
 
         {/* File message display */}
         {isFile ? (
-          <div className="text-sm">
+          <div className="flex items-center gap-3 bg-gray-300/20 p-3 rounded-xl shadow-inner">
+            <File className="text-white w-8 h-8" />
+
+            {/* File info */}
+            <div className="flex-1 mr-10">
+              <div className="font-medium text-gray-900 dark:text-gray-100 truncate">
+                {filename}
+              </div>
+              <div className="text-xs text-gray-100 truncate">{extension}  {filesize}</div>
+            </div>
+
+            {/* Download button */}
             <a
-              href={message.payload?.url}
+              href={fileUrl}
+              download
               target="_blank"
               rel="noopener noreferrer"
-              className="text-blue-500 underline break-all"
+              className="text-white"
             >
-              {message.payload?.filename}
+              <Download />
             </a>
           </div>
         ) : (
           <div className="text-sm">{message.payload?.text}</div>
         )}
 
+        {/* Timestamp (not shown on system messages) */}
         {!isSystem && message.timestamp && (
           <div
             className={`text-xs mt-1 ${
