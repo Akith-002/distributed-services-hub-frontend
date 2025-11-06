@@ -56,7 +56,7 @@ function MessageBubble({ message, currentUsername }) {
 
         {/* File message display */}
         {isFile ? (
-          <div className="flex items-center gap-3 bg-gray-300/20 p-3 rounded-xl shadow-inner">
+          <div className={`flex items-center gap-3 p-3 rounded-xl shadow-inner ${isOwnMessage ? 'bg-gray-300/20' : 'bg-gray-400'}`}>
             <File className="text-white w-8 h-8" />
 
             {/* File info */}
