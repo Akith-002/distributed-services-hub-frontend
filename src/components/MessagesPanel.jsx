@@ -1,6 +1,7 @@
 function MessageBubble({ message, currentUsername }) {
   const isOwnMessage = message.payload?.username === currentUsername;
   const isSystem = message.type === 'SYSTEM';
+  const isFile = message.type === 'FILE_UPLOAD';
 
   function formatTime(timestamp) {
     if (!timestamp) return '';
@@ -17,7 +18,8 @@ function MessageBubble({ message, currentUsername }) {
   const baseClasses = 'max-w-md px-4 rounded-2xl';
   const systemStyles = 'bg-gray-200 py-1 text-gray-700 text-sm rounded-lg';
   const ownMessageStyles = 'bg-blue-600 py-2 text-white rounded-br-sm';
-  const otherMessageStyles = 'bg-white py-2 text-gray-800 rounded-bl-sm shadow-sm';
+  const otherMessageStyles =
+    'bg-white py-2 text-gray-800 rounded-bl-sm shadow-sm';
 
   let bubbleClasses = '';
   let alignmentClasses = '';
@@ -43,10 +45,22 @@ function MessageBubble({ message, currentUsername }) {
           </div>
         )}
 
-        {/* Message text */}
-        <div className="text-sm">{message.payload?.text}</div>
+        {/* File message display */}
+        {isFile ? (
+          <div className="text-sm">
+            <a
+              href={message.payload?.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-500 underline break-all"
+            >
+              {message.payload?.filename}
+            </a>
+          </div>
+        ) : (
+          <div className="text-sm">{message.payload?.text}</div>
+        )}
 
-        {/* Timestamp - shown only for non-system messages */}
         {!isSystem && message.timestamp && (
           <div
             className={`text-xs mt-1 ${
