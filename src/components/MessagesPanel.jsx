@@ -1,9 +1,11 @@
 import { Download, File } from 'lucide-react';
+import LinkPreview from './LinkPreview';
 
 function MessageBubble({ message, currentUsername }) {
   const isOwnMessage = message.payload?.username === currentUsername;
   const isSystem = message.type === 'SYSTEM';
   const isFile = message.type === 'FILE_UPLOAD';
+  const isUrlPreview = message.type === 'URL_PREVIEW';
 
   function formatTime(timestamp) {
     if (!timestamp) return '';
@@ -42,6 +44,19 @@ function MessageBubble({ message, currentUsername }) {
   } else {
     bubbleClasses = `${baseClasses} ${otherMessageStyles}`;
     alignmentClasses = 'justify-start';
+  }
+
+  // Render URL Preview separately (centered, full width)
+  if (isUrlPreview) {
+    return (
+      <div className="flex justify-center my-2">
+        <LinkPreview
+          url={message.payload?.url}
+          title={message.payload?.text}
+          sender={message.payload?.username}
+        />
+      </div>
+    );
   }
 
   return (
