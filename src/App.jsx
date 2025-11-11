@@ -17,6 +17,8 @@ export default function App() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [uploadMessage, setUploadMessage] = useState('');
   const [isUploading, setIsUploading] = useState(false);
+  const [serverStatus, setServerStatus] = useState('');
+  const [showServerStatus, setShowServerStatus] = useState(false);
 
   const ws = useRef(null);
   const messagesEndRef = useRef(null);
@@ -113,6 +115,17 @@ export default function App() {
               timestamp: msg.timestamp || new Date().toLocaleTimeString(),
             },
           ]);
+          break;
+
+        case 'SERVER_STATUS':
+          setServerStatus(msg.payload?.text || 'Unknown');
+          setShowServerStatus(true);
+          setTimeout(() => setShowServerStatus(false), 5000);
+          break;
+
+        case 'URL_PREVIEW':
+          console.log('📎 URL Preview received:', msg);
+          setMessages((prev) => [...prev, msg]);
           break;
 
         default:
@@ -239,9 +252,15 @@ export default function App() {
       ws.current = null;
     }
     setIsConnected(false);
-    setMessages([]);
-    setUsers([]);
-    setTypingUsers([]);
+    setUsername('');
+  };
+
+  const checkServerHealth = () => {
+    if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+      ws.current.send(JSON.stringify({ type: 'GET_STATUS' }));
+    } else {
+      setError('Not connected to server');
+    }
   };
 
   const handleKeyDown = (e) => {
@@ -346,6 +365,12 @@ export default function App() {
               {useSSL ? 'SSL' : 'No SSL'}
             </span>
             <button
+              onClick={checkServerHealth}
+              className="bg-green-500 hover:bg-green-600 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+            >
+              🏥 Check Server Status
+            </button>
+            <button
               onClick={handleDisconnect}
               className="bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
             >
@@ -354,6 +379,12 @@ export default function App() {
           </div>
         </div>
       </div>
+
+      {showServerStatus && (
+        <div className="bg-green-50 border-b border-green-200 text-green-700 px-6 py-3 text-sm font-medium">
+          🟢 {serverStatus}
+        </div>
+      )}
 
       {error && (
         <div className="bg-red-50 border-b border-red-200 text-red-700 px-6 py-3 text-sm">

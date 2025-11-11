@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import LinkPreview from "./LinkPreview";
 
 export default function ChatRoom() {
   const [messages, setMessages] = useState([]);
@@ -6,15 +7,19 @@ export default function ChatRoom() {
   const [text, setText] = useState("");
   const [isConnected, setIsConnected] = useState(false);
   const [users, setUsers] = useState([]);
+  const [serverStatus, setServerStatus] = useState("Unknown");
+  const [showStatus, setShowStatus] = useState(false);
   const ws = useRef(null);
   const messagesEndRef = useRef(null);
   const reconnectAttemptsRef = useRef(0);
   const shouldReconnect = useRef(false);
+  const statusTimeoutRef = useRef(null);
   const maxReconnectAttempts = 6; // exponential backoff cap
   // Ensure refs are not flagged as unused by some linters
   void messagesEndRef;
   void reconnectAttemptsRef;
   void shouldReconnect;
+  void statusTimeoutRef;
 
   const connectWebSocket = (name) => {
     // Close previous connection if present
@@ -60,6 +65,27 @@ export default function ChatRoom() {
       // USER_LIST_UPDATE -> update users state
       if (msg.type === "USER_LIST_UPDATE") {
         setUsers(Array.isArray(msg.payload?.users) ? msg.payload.users : []);
+        return;
+      }
+      
+      // URL_PREVIEW -> handle link preview (Member 5 feature)
+      if (msg.type === "URL_PREVIEW") {
+        setMessages((prev) => [...prev, { ...msg, isLinkPreview: true }]);
+        return;
+      }
+      
+      // SERVER_STATUS -> handle health check response (Member 5 feature)
+      if (msg.type === "SERVER_STATUS") {
+        setServerStatus(msg.payload?.text || "Unknown");
+        setShowStatus(true);
+        
+        // Auto-hide status after 8 seconds
+        if (statusTimeoutRef.current) {
+          clearTimeout(statusTimeoutRef.current);
+        }
+        statusTimeoutRef.current = setTimeout(() => {
+          setShowStatus(false);
+        }, 8000);
         return;
       }
 
@@ -128,11 +154,29 @@ export default function ChatRoom() {
     }
     setIsConnected(false);
   };
+  
+  // Function to request server health status (Member 5 - UDP Health Check feature)
+  const checkServerHealth = () => {
+    if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+      try {
+        ws.current.send(JSON.stringify({ type: "GET_STATUS" }));
+        console.log("📊 Requesting server health status...");
+      } catch (err) {
+        console.error("Failed to request server status:", err);
+        alert("Failed to request server status");
+      }
+    } else {
+      alert("Not connected to server!");
+    }
+  };
 
   // Cleanup connection when leaving the page
   useEffect(() => {
     return () => {
       if (ws.current) ws.current.close();
+      if (statusTimeoutRef.current) {
+        clearTimeout(statusTimeoutRef.current);
+      }
     };
   }, []);
 
@@ -159,7 +203,43 @@ export default function ChatRoom() {
 
   return (
     <div style={{ padding: 20, fontFamily: "Arial" }}>
-      <h2>💬 WebSocket Chat Room</h2>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+        <h2>💬 WebSocket Chat Room</h2>
+        <button
+          onClick={checkServerHealth}
+          style={{
+            backgroundColor: "#28a745",
+            color: "white",
+            border: "none",
+            borderRadius: 5,
+            padding: "8px 16px",
+            cursor: "pointer",
+            fontSize: "14px",
+            fontWeight: "bold",
+          }}
+          title="Check UDP health status"
+        >
+          🏥 Check Server Health
+        </button>
+      </div>
+      
+      {showStatus && (
+        <div
+          style={{
+            backgroundColor: "#d4edda",
+            border: "1px solid #c3e6cb",
+            borderRadius: 5,
+            padding: 12,
+            marginBottom: 10,
+            color: "#155724",
+            textAlign: "center",
+            animation: "fadeIn 0.3s",
+          }}
+        >
+          <strong>Server Status:</strong> {serverStatus}
+        </div>
+      )}
+      
       <p>
         Connected as: <strong>{username}</strong>
       </p>
@@ -221,6 +301,19 @@ export default function ChatRoom() {
             }}
           >
             {messages.map((msg, i) => {
+              // Handle Link Preview (Member 5 feature)
+              if (msg.isLinkPreview || msg.type === "URL_PREVIEW") {
+                return (
+                  <LinkPreview
+                    key={i}
+                    url={msg.payload?.url}
+                    title={msg.payload?.text}
+                    sender={msg.payload?.username}
+                    timestamp={msg.timestamp}
+                  />
+                );
+              }
+              
               const isOwnMessage = msg.payload?.username === username;
               const isSystem = msg.type === "SYSTEM";
 
