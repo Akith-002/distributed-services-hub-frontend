@@ -68,7 +68,7 @@ export default function SecurityTestTab({ onSendCommand, isConnected }) {
               Security Test
             </h2>
             <p className="text-sm text-slate-300 mt-1">
-              Member 3 - JSSE & SSLServerSocket
+              SSL/TLS connection verification
             </p>
           </div>
 
@@ -144,17 +144,11 @@ export default function SecurityTestTab({ onSendCommand, isConnected }) {
           {/* Info Box */}
           <div className="bg-slate-700/30 border-t border-slate-600 px-6 py-4">
             <p className="text-xs text-slate-400 leading-relaxed">
-              <strong>🔐 JSSE/SSL Implementation (Lesson 8):</strong>
+              <strong>Security Implementation:</strong> The Secure File Service runs on SSLServerSocket (port 9090), ensuring all connections are encrypted.
+              <br /><br />
+              <strong>Test 1:</strong> Regular Socket → Rejected ✗
               <br />
-              The Secure File Service runs on <strong className="text-amber-300">SSLServerSocket</strong> (port 9090). This automated test proves SSL enforcement:
-              <br />
-              <br />
-              <strong className="text-red-300">Test 1:</strong> Regular Socket connection → REJECTED ✗
-              <br />
-              <strong className="text-green-300">Test 2:</strong> SSLSocket with proper handshake → ACCEPTED ✓
-              <br />
-              <br />
-              <strong className="text-amber-300">Key Concepts:</strong> SSLServerSocket, SSLSocket, KeyStore, TLS handshake, Certificate validation, Encrypted transmission
+              <strong>Test 2:</strong> SSL Socket → Accepted ✓
             </p>
           </div>
         </div>

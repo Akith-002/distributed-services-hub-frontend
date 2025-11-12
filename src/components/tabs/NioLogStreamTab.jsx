@@ -98,38 +98,31 @@ export default function NioLogStreamTab({ isConnected }) {
             <AlertCircle className="w-5 h-5 text-purple-400 shrink-0 mt-0.5" />
             <div>
               <h3 className="font-semibold text-purple-200 mb-2">
-                📝 How to See Logs in Action
+                How to View Logs
               </h3>
               <p className="text-sm text-purple-100 mb-3">
-                The NIO Log Service is running on port 9091 and ready to receive log messages. 
-                Logs will stream here in real-time as they arrive.
+                The log service is running on port 9091 and ready to receive log messages.
               </p>
               
               <div className="bg-slate-800/50 rounded-lg p-3 border border-purple-700/30 mb-3">
                 <p className="text-xs font-semibold text-purple-300 mb-2">
-                  🎯 Quick Demo (Recommended):
+                  Quick Demo:
                 </p>
                 <p className="text-xs text-purple-200">
-                  Click the <strong className="text-purple-300">"Demo Logs"</strong> button above 
-                  to see simulated log streaming in action!
+                  Click the <strong className="text-purple-300">"Demo Logs"</strong> button above to see sample log entries.
                 </p>
               </div>
 
               <div className="bg-slate-800/50 rounded-lg p-3 border border-purple-700/30">
                 <p className="text-xs font-semibold text-purple-300 mb-2">
-                  📡 Send Real Logs via NIO Client:
+                  Send Real Logs:
                 </p>
                 <code className="text-xs text-purple-200 font-mono block">
-                  cd distributed-services-hub\nio-log-service
+                  cd nio-log-service
                   <br />
                   .\test-log-client.ps1
                 </code>
               </div>
-              
-              <p className="text-xs text-purple-300 mt-3">
-                💡 This demonstrates Java NIO's ability to handle multiple concurrent log streams 
-                using a single-threaded Selector with non-blocking I/O.
-              </p>
             </div>
           </div>
         </div>
@@ -143,7 +136,7 @@ export default function NioLogStreamTab({ isConnected }) {
             NIO Log Stream
           </h2>
           <p className="text-sm text-slate-300 mt-1">
-            Member 4 - Java NIO with Selector (Non-blocking I/O)
+            Real-time logging service with non-blocking I/O
           </p>
         </div>
 
@@ -309,19 +302,14 @@ export default function NioLogStreamTab({ isConnected }) {
       <div className="bg-slate-700/30 rounded-lg border border-slate-600 p-4">
         <h3 className="font-semibold text-slate-200 mb-2 flex items-center gap-2">
           <AlertCircle className="w-4 h-4 text-amber-400" />
-          About Java NIO (Lesson 7) - Non-Blocking I/O
+          About Non-Blocking I/O
         </h3>
         <p className="text-xs text-slate-400 leading-relaxed">
-          Unlike traditional <strong>ServerSocket</strong> (blocking I/O), Java NIO uses
-          <strong className="text-purple-300"> ServerSocketChannel</strong>, <strong className="text-purple-300">SocketChannel</strong>, and <strong className="text-purple-300">Selector</strong> for high-performance
-          non-blocking I/O. 
+          This service uses Java NIO (New I/O) with ServerSocketChannel and Selector for high-performance non-blocking I/O. 
+          A single thread with a Selector can manage thousands of concurrent connections by listening for I/O events 
+          without blocking on any single operation.
           <br /><br />
-          <strong className="text-purple-300">Architecture:</strong> A single thread with a Selector can manage <strong>thousands
-          of concurrent connections</strong> by listening for I/O events (OP_ACCEPT, OP_READ,
-          OP_WRITE) without blocking on any single operation. This is essential for
-          scalable network services like high-performance web servers and real-time logging systems.
-          <br /><br />
-          <strong className="text-purple-300">Implementation:</strong> Port 9091 • ServerSocketChannel • Selector.select() event loop • ByteBuffer data transfer • Daily log rotation
+          <strong>Implementation:</strong> Port 9091 • Non-blocking event loop • Efficient connection handling
         </p>
       </div>
     </div>

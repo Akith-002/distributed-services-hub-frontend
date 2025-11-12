@@ -82,7 +82,7 @@ export default function ApiGatewayTab({ onSendCommand, isConnected }) {
               API Gateway
             </h2>
             <p className="text-sm text-slate-300 mt-1">
-              Member 2 - HttpURLConnection to External APIs
+              External API integration service
             </p>
           </div>
 
@@ -155,20 +155,7 @@ export default function ApiGatewayTab({ onSendCommand, isConnected }) {
           {/* Info Box */}
           <div className="bg-slate-700/30 border-t border-slate-600 px-6 py-4">
             <p className="text-xs text-slate-400 leading-relaxed">
-              <strong>🔗 HttpURLConnection Implementation (Lesson 5):</strong>
-              <br />
-              1. Dashboard sends command to Hub via WebSocket
-              <br />
-              2. Hub forwards to API Gateway service (TCP, port 9001)
-              <br />
-              3. API Gateway uses HttpURLConnection (NO third-party libraries)
-              <br />
-              4. Fetches data from Open-Meteo Weather API
-              <br />
-              5. Result flows back: API Gateway → Hub → Dashboard
-              <br />
-              <br />
-              <strong className="text-cyan-300">Key Concepts:</strong> URL connection, HTTP GET requests, Response stream processing, JSON parsing
+              <strong>Data Flow:</strong> Dashboard → Hub → API Gateway → External API → Results returned to Dashboard
             </p>
           </div>
         </div>

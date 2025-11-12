@@ -90,7 +90,7 @@ export default function RmiTaskRunnerTab({ onSendCommand, isConnected }) {
               RMI Task Runner
             </h2>
             <p className="text-sm text-slate-300 mt-1">
-              Member 5 - Java Remote Method Invocation
+              Remote task execution service
             </p>
           </div>
 
@@ -167,22 +167,7 @@ export default function RmiTaskRunnerTab({ onSendCommand, isConnected }) {
           {/* Info Box */}
           <div className="bg-slate-700/30 border-t border-slate-600 px-6 py-4">
             <p className="text-xs text-slate-400 leading-relaxed">
-              <strong>🔗 Java RMI Flow (Remote Method Invocation):</strong>
-              <br />
-              1. Dashboard sends task command to Hub via WebSocket
-              <br />
-              2. Hub forwards command to RMI service via TCP
-              <br />
-              3. RMI client looks up remote object: <span className="text-yellow-300 font-mono">rmi://localhost:1099/TaskService</span>
-              <br />
-              4. Remote method invocation: <span className="text-yellow-300 font-mono">taskService.executeTask(taskName)</span>
-              <br />
-              5. Result serialized and returned through RMI stub
-              <br />
-              6. Response flows back: RMI Service → Hub → Dashboard
-              <br />
-              <br />
-              <strong className="text-yellow-300">Key Concepts:</strong> Remote interface, UnicastRemoteObject, RMI Registry, Stub/Skeleton, Object serialization, Distributed computing
+              <strong>Execution Flow:</strong> Dashboard sends task command → Hub forwards to RMI service → Remote method invoked → Result returns to Dashboard
             </p>
           </div>
         </div>

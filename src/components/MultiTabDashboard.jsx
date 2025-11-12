@@ -19,8 +19,6 @@ export default function MultiTabDashboard() {
   const [services, setServices] = useState([]);
   const [isConnected, setIsConnected] = useState(false);
   const [error, setError] = useState(null);
-  const [username, setUsername] = useState("Dashboard-User");
-  const [useSSL, setUseSSL] = useState(false);
   const [selectedService, setSelectedService] = useState(null);
 
   const ws = useRef(null);
@@ -30,12 +28,12 @@ export default function MultiTabDashboard() {
   const heartbeatIntervalRef = useRef(null);
 
   const getWebSocketUrl = () => {
-    const protocol = useSSL ? "wss" : "ws";
-    const port = useSSL ? "7443" : "7071";
+    const protocol = "ws";
+    const port = "7071";
     return `${protocol}://localhost:${port}/registry`;
   };
 
-  const connectWebSocket = (name) => {
+  const connectWebSocket = () => {
     if (ws.current) {
       try {
         ws.current.close();
@@ -77,7 +75,7 @@ export default function MultiTabDashboard() {
         ws.current.send(
           JSON.stringify({
             type: "DASHBOARD_CONNECT",
-            payload: { username: name },
+            payload: { username: "Dashboard" },
           })
         );
       } catch (err) {
@@ -143,13 +141,13 @@ export default function MultiTabDashboard() {
         console.log(
           `Reconnecting... (attempt ${reconnectAttemptsRef.current}/${maxReconnectAttempts})`
         );
-        setTimeout(() => connectWebSocket(name), 3000);
+        setTimeout(() => connectWebSocket(), 3000);
       }
     };
   };
 
   useEffect(() => {
-    connectWebSocket(username);
+    connectWebSocket();
 
     return () => {
       shouldReconnectRef.current = false;
@@ -158,7 +156,7 @@ export default function MultiTabDashboard() {
         ws.current.close();
       }
     };
-  }, [useSSL]);
+  }, []);
 
   const sendCommand = (commandFor, payload) => {
     if (ws.current && ws.current.readyState === WebSocket.OPEN) {
@@ -228,18 +226,10 @@ export default function MultiTabDashboard() {
                 Distributed Services Hub
               </h1>
               <p className="text-slate-400 text-sm mt-1">
-                All Services Operational - Phases 1-6 Complete ✓
+                Microservices Management Dashboard
               </p>
             </div>
             <div className="flex items-center gap-4">
-              <div className="bg-gradient-to-r from-green-600/20 to-emerald-600/20 border border-green-500/30 rounded-lg px-3 py-1.5">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                  <span className="text-xs font-semibold text-green-300">
-                    5 Services Active
-                  </span>
-                </div>
-              </div>
               <div className="flex items-center gap-2">
                 <div
                   className={`w-3 h-3 rounded-full animate-pulse ${
@@ -247,7 +237,7 @@ export default function MultiTabDashboard() {
                   }`}
                 />
                 <span className="text-sm font-medium text-slate-300">
-                  {isConnected ? "Hub Connected" : "Hub Disconnected"}
+                  {isConnected ? "Connected" : "Disconnected"}
                 </span>
               </div>
               {!isConnected && <WifiOff className="w-5 h-5 text-red-400" />}
@@ -315,43 +305,16 @@ export default function MultiTabDashboard() {
 
       {/* Footer */}
       <footer className="bg-slate-800 border-t border-slate-700 mt-12 py-6">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Status Overview */}
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-4">
-            <div className="bg-slate-700/30 rounded-lg p-3 text-center">
-              <div className="text-xs text-slate-400 mb-1">Hub Server</div>
-              <div className="text-sm font-semibold text-green-300">✓ Phase 1</div>
-            </div>
-            <div className="bg-slate-700/30 rounded-lg p-3 text-center">
-              <div className="text-xs text-slate-400 mb-1">API Gateway</div>
-              <div className="text-sm font-semibold text-cyan-300">✓ Phase 3</div>
-            </div>
-            <div className="bg-slate-700/30 rounded-lg p-3 text-center">
-              <div className="text-xs text-slate-400 mb-1">Secure File</div>
-              <div className="text-sm font-semibold text-amber-300">✓ Phase 4</div>
-            </div>
-            <div className="bg-slate-700/30 rounded-lg p-3 text-center">
-              <div className="text-xs text-slate-400 mb-1">NIO Logger</div>
-              <div className="text-sm font-semibold text-purple-300">✓ Phase 5</div>
-            </div>
-            <div className="bg-slate-700/30 rounded-lg p-3 text-center">
-              <div className="text-xs text-slate-400 mb-1">RMI Tasks</div>
-              <div className="text-sm font-semibold text-yellow-300">✓ Phase 6</div>
-            </div>
-          </div>
-          
-          {/* Connection Status */}
-          <div className="text-center">
-            <p className="text-slate-400 text-sm">
-              All Services Operational - Phases 1-6 Complete -{" "}
-              <span className={isConnected ? "text-green-400 font-semibold" : "text-red-400 font-semibold"}>
-                {isConnected ? "✓ Hub Connected" : "✗ Hub Disconnected"}
-              </span>
-            </p>
-            <p className="mt-2 text-xs text-slate-500">
-              Network Programming L3S1 • Microservices Architecture • November 2025
-            </p>
-          </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <p className="text-slate-400 text-sm">
+            Status: {" "}
+            <span className={isConnected ? "text-green-400 font-semibold" : "text-red-400 font-semibold"}>
+              {isConnected ? "Hub Online" : "Hub Offline"}
+            </span>
+          </p>
+          <p className="mt-2 text-xs text-slate-500">
+            Distributed Services Hub • Microservices Architecture
+          </p>
         </div>
       </footer>
     </div>

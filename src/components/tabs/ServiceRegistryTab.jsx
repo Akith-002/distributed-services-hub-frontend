@@ -12,8 +12,6 @@ import {
 
 export default function ServiceRegistryTab({
   services,
-  selectedService,
-  onSelectService,
   isConnected,
 }) {
   const [expandedService, setExpandedService] = useState(null);
@@ -63,41 +61,6 @@ export default function ServiceRegistryTab({
 
   return (
     <div className="space-y-6">
-      {/* Implementation Overview Panel */}
-      <div className="bg-gradient-to-r from-blue-900/30 to-indigo-900/30 rounded-lg border border-blue-700/50 p-6">
-        <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-          <Server className="w-5 h-5 text-blue-400" />
-          Microservices Architecture Overview
-        </h3>
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
-          <div className="bg-slate-700/40 rounded-lg p-3 border border-slate-600">
-            <div className="text-xs text-slate-400 mb-1">API Gateway</div>
-            <div className="text-sm font-semibold text-cyan-300">HttpURLConnection</div>
-            <div className="text-xs text-slate-500 mt-1">Port 9001</div>
-          </div>
-          <div className="bg-slate-700/40 rounded-lg p-3 border border-slate-600">
-            <div className="text-xs text-slate-400 mb-1">Secure File</div>
-            <div className="text-sm font-semibold text-amber-300">SSL/JSSE</div>
-            <div className="text-xs text-slate-500 mt-1">Port 9090</div>
-          </div>
-          <div className="bg-slate-700/40 rounded-lg p-3 border border-slate-600">
-            <div className="text-xs text-slate-400 mb-1">NIO Logger</div>
-            <div className="text-sm font-semibold text-purple-300">Java NIO</div>
-            <div className="text-xs text-slate-500 mt-1">Port 9091</div>
-          </div>
-          <div className="bg-slate-700/40 rounded-lg p-3 border border-slate-600">
-            <div className="text-xs text-slate-400 mb-1">RMI Tasks</div>
-            <div className="text-sm font-semibold text-yellow-300">Remote Methods</div>
-            <div className="text-xs text-slate-500 mt-1">Port 1099</div>
-          </div>
-          <div className="bg-slate-700/40 rounded-lg p-3 border border-slate-600">
-            <div className="text-xs text-slate-400 mb-1">Hub Server</div>
-            <div className="text-sm font-semibold text-green-300">Message Broker</div>
-            <div className="text-xs text-slate-500 mt-1">Port 7070</div>
-          </div>
-        </div>
-      </div>
-
       <div className="bg-slate-700/50 rounded-lg border border-slate-600 overflow-hidden">
       {/* Header */}
       <div className="bg-gradient-to-r from-slate-700 to-slate-600 px-6 py-4 border-b border-slate-600">
@@ -108,7 +71,7 @@ export default function ServiceRegistryTab({
               Service Registry
             </h2>
             <p className="text-sm text-slate-300 mt-1">
-              Member 1 - Multithreading & Concurrency (ConcurrentHashMap)
+              Connected services and their status
             </p>
           </div>
           <div className="flex items-center gap-3">
@@ -316,9 +279,7 @@ export default function ServiceRegistryTab({
       {/* Footer Info */}
       <div className="bg-slate-700/30 border-t border-slate-600 px-6 py-3">
         <p className="text-xs text-slate-400">
-          💡 <strong>Tip:</strong> Services register via TCP on port 7070, send
-          heartbeats every 10 seconds, and are removed if timeout exceeds 30
-          seconds.
+          Services communicate with the Hub via TCP on port 7070 with automatic heartbeat monitoring.
         </p>
       </div>
     </div>
