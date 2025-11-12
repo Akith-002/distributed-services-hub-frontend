@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
-import { ActivitySquare, Trash2, Download, AlertCircle } from "lucide-react";
+import { ActivitySquare, Trash2, Download, AlertCircle, PlayCircle } from "lucide-react";
 
 export default function NioLogStreamTab({ isConnected }) {
   const [logs, setLogs] = useState([]);
+  const [sendingDemo, setSendingDemo] = useState(false);
   const logsEndRef = useRef(null);
 
   useEffect(() => {
@@ -10,7 +11,7 @@ export default function NioLogStreamTab({ isConnected }) {
       const msg = event.detail;
       if (msg.result_from === "NIO_SERVICE") {
         const logEntry = {
-          id: Date.now(),
+          id: Date.now() + Math.random(), // Ensure unique IDs
           timestamp: new Date(),
           message: msg.data,
         };
@@ -50,8 +51,90 @@ export default function NioLogStreamTab({ isConnected }) {
     document.body.removeChild(element);
   };
 
+  const handleSendDemoLogs = () => {
+    setSendingDemo(true);
+    
+    // Simulate receiving demo logs
+    const demoLogs = [
+      "API_GATEWAY: Weather API request initiated for Colombo",
+      "API_GATEWAY: HttpURLConnection established to api.open-meteo.com",
+      "API_GATEWAY: Response received - 200 OK (28.5°C, Partly Cloudy)",
+      "SECURE_FILE_SERVICE: Client connected via SSL handshake (TLSv1.3)",
+      "SECURE_FILE_SERVICE: File 'document.pdf' stored successfully (2.4 MB)",
+      "SECURE_FILE_SERVICE: SSL session closed gracefully",
+      "RMI_SERVICE: Task 'calculate-pi' invoked remotely",
+      "RMI_SERVICE: Pi calculation completed - Result: 3.14159265359",
+      "HUB_SERVER: Service 'API_GATEWAY' heartbeat received",
+      "HUB_SERVER: Service 'JSSE_SERVICE' heartbeat received",
+      "HUB_SERVER: Broadcasting service registry update to 3 dashboard clients",
+      "NIO_LOG_SERVICE: New connection accepted (non-blocking I/O)",
+      "NIO_LOG_SERVICE: ByteBuffer allocated - Ready to read log data",
+      "NIO_LOG_SERVICE: Log written to file - logs/service-2025-11-12.log"
+    ];
+
+    let index = 0;
+    const interval = setInterval(() => {
+      if (index < demoLogs.length) {
+        const logEntry = {
+          id: Date.now() + Math.random(),
+          timestamp: new Date(),
+          message: `LOG: ${demoLogs[index]}`,
+        };
+        setLogs((prev) => [...prev, logEntry]);
+        index++;
+      } else {
+        clearInterval(interval);
+        setSendingDemo(false);
+      }
+    }, 400); // Send one log every 400ms
+  };
+
   return (
     <div className="space-y-4">
+      {/* Info Banner - How to Generate Logs */}
+      {logs.length === 0 && (
+        <div className="bg-gradient-to-r from-purple-900/30 to-pink-900/30 rounded-lg border border-purple-700/50 p-4">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-purple-400 shrink-0 mt-0.5" />
+            <div>
+              <h3 className="font-semibold text-purple-200 mb-2">
+                📝 How to See Logs in Action
+              </h3>
+              <p className="text-sm text-purple-100 mb-3">
+                The NIO Log Service is running on port 9091 and ready to receive log messages. 
+                Logs will stream here in real-time as they arrive.
+              </p>
+              
+              <div className="bg-slate-800/50 rounded-lg p-3 border border-purple-700/30 mb-3">
+                <p className="text-xs font-semibold text-purple-300 mb-2">
+                  🎯 Quick Demo (Recommended):
+                </p>
+                <p className="text-xs text-purple-200">
+                  Click the <strong className="text-purple-300">"Demo Logs"</strong> button above 
+                  to see simulated log streaming in action!
+                </p>
+              </div>
+
+              <div className="bg-slate-800/50 rounded-lg p-3 border border-purple-700/30">
+                <p className="text-xs font-semibold text-purple-300 mb-2">
+                  📡 Send Real Logs via NIO Client:
+                </p>
+                <code className="text-xs text-purple-200 font-mono block">
+                  cd distributed-services-hub\nio-log-service
+                  <br />
+                  .\test-log-client.ps1
+                </code>
+              </div>
+              
+              <p className="text-xs text-purple-300 mt-3">
+                💡 This demonstrates Java NIO's ability to handle multiple concurrent log streams 
+                using a single-threaded Selector with non-blocking I/O.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header Card */}
       <div className="bg-slate-700/50 rounded-lg border border-slate-600 overflow-hidden">
         <div className="bg-gradient-to-r from-purple-600/50 to-pink-600/50 px-6 py-4 border-b border-slate-600">
@@ -74,6 +157,18 @@ export default function NioLogStreamTab({ isConnected }) {
             )}
           </div>
           <div className="flex gap-2">
+            <button
+              onClick={handleSendDemoLogs}
+              disabled={sendingDemo}
+              className={`px-3 py-1.5 rounded text-xs font-medium flex items-center gap-1.5 transition-colors ${
+                sendingDemo
+                  ? "bg-slate-600 text-slate-400 cursor-not-allowed"
+                  : "bg-purple-600 hover:bg-purple-700 text-white"
+              }`}
+            >
+              <PlayCircle className="w-3 h-3" />
+              {sendingDemo ? "Sending..." : "Demo Logs"}
+            </button>
             <button
               onClick={handleDownloadLogs}
               disabled={logs.length === 0}
@@ -108,13 +203,23 @@ export default function NioLogStreamTab({ isConnected }) {
           <div className="flex-1 flex flex-col items-center justify-center p-12 text-center">
             <div className="text-6xl mb-4">📝</div>
             <h3 className="text-lg font-semibold text-slate-200 mb-2">
-              Waiting for logs
+              Waiting for log messages...
             </h3>
-            <p className="text-slate-400 max-w-md">
-              Logs from all services will appear here in real-time. The NIO Log
-              Service uses Java NIO Selector for non-blocking I/O to handle
-              multiple concurrent log streams.
+            <p className="text-slate-400 max-w-md mb-4">
+              The NIO Log Service is <span className="text-green-400 font-semibold">running on port 9091</span> and 
+              using Java NIO Selector for non-blocking I/O. Logs will stream here in real-time when clients 
+              connect and send log messages.
             </p>
+            <div className="bg-slate-700/50 rounded-lg p-4 border border-slate-600 max-w-lg">
+              <p className="text-xs text-slate-300 mb-2">
+                <strong>To see logs in action:</strong>
+              </p>
+              <ol className="text-xs text-slate-400 text-left space-y-1">
+                <li>1. Open a terminal in <code className="text-purple-300">nio-log-service</code> folder</li>
+                <li>2. Run: <code className="text-purple-300">.\test-log-client.ps1</code></li>
+                <li>3. Watch logs appear here in real-time! ✨</li>
+              </ol>
+            </div>
           </div>
         ) : (
           <div className="flex-1 overflow-y-auto font-mono text-sm">
@@ -204,15 +309,19 @@ export default function NioLogStreamTab({ isConnected }) {
       <div className="bg-slate-700/30 rounded-lg border border-slate-600 p-4">
         <h3 className="font-semibold text-slate-200 mb-2 flex items-center gap-2">
           <AlertCircle className="w-4 h-4 text-amber-400" />
-          About Java NIO (Lesson 7)
+          About Java NIO (Lesson 7) - Non-Blocking I/O
         </h3>
         <p className="text-xs text-slate-400 leading-relaxed">
-          Unlike traditional ServerSocket (blocking I/O), Java NIO uses
-          ServerSocketChannel, SocketChannel, and Selector for high-performance
-          non-blocking I/O. A single thread with a Selector can manage thousands
-          of concurrent connections by listening for I/O events (accept, read,
-          write) without blocking on any single operation. This is essential for
-          scalable network services.
+          Unlike traditional <strong>ServerSocket</strong> (blocking I/O), Java NIO uses
+          <strong className="text-purple-300"> ServerSocketChannel</strong>, <strong className="text-purple-300">SocketChannel</strong>, and <strong className="text-purple-300">Selector</strong> for high-performance
+          non-blocking I/O. 
+          <br /><br />
+          <strong className="text-purple-300">Architecture:</strong> A single thread with a Selector can manage <strong>thousands
+          of concurrent connections</strong> by listening for I/O events (OP_ACCEPT, OP_READ,
+          OP_WRITE) without blocking on any single operation. This is essential for
+          scalable network services like high-performance web servers and real-time logging systems.
+          <br /><br />
+          <strong className="text-purple-300">Implementation:</strong> Port 9091 • ServerSocketChannel • Selector.select() event loop • ByteBuffer data transfer • Daily log rotation
         </p>
       </div>
     </div>

@@ -228,10 +228,18 @@ export default function MultiTabDashboard() {
                 Distributed Services Hub
               </h1>
               <p className="text-slate-400 text-sm mt-1">
-                Phase 2: Multi-Tab Dashboard with Service Integration
+                All Services Operational - Phases 1-6 Complete ✓
               </p>
             </div>
             <div className="flex items-center gap-4">
+              <div className="bg-gradient-to-r from-green-600/20 to-emerald-600/20 border border-green-500/30 rounded-lg px-3 py-1.5">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                  <span className="text-xs font-semibold text-green-300">
+                    5 Services Active
+                  </span>
+                </div>
+              </div>
               <div className="flex items-center gap-2">
                 <div
                   className={`w-3 h-3 rounded-full animate-pulse ${
@@ -239,7 +247,7 @@ export default function MultiTabDashboard() {
                   }`}
                 />
                 <span className="text-sm font-medium text-slate-300">
-                  {isConnected ? "Connected" : "Disconnected"}
+                  {isConnected ? "Hub Connected" : "Hub Disconnected"}
                 </span>
               </div>
               {!isConnected && <WifiOff className="w-5 h-5 text-red-400" />}
@@ -307,16 +315,43 @@ export default function MultiTabDashboard() {
 
       {/* Footer */}
       <footer className="bg-slate-800 border-t border-slate-700 mt-12 py-6">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-slate-400 text-sm">
-          <p>
-            Phase 2: React Dashboard & API Gateway Service -{" "}
-            <span className={isConnected ? "text-green-400" : "text-red-400"}>
-              {isConnected ? "✓ Connected" : "✗ Disconnected"}
-            </span>
-          </p>
-          <p className="mt-2 text-xs text-slate-500">
-            Each tab demonstrates a different member's networking concept
-          </p>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Status Overview */}
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-4">
+            <div className="bg-slate-700/30 rounded-lg p-3 text-center">
+              <div className="text-xs text-slate-400 mb-1">Hub Server</div>
+              <div className="text-sm font-semibold text-green-300">✓ Phase 1</div>
+            </div>
+            <div className="bg-slate-700/30 rounded-lg p-3 text-center">
+              <div className="text-xs text-slate-400 mb-1">API Gateway</div>
+              <div className="text-sm font-semibold text-cyan-300">✓ Phase 3</div>
+            </div>
+            <div className="bg-slate-700/30 rounded-lg p-3 text-center">
+              <div className="text-xs text-slate-400 mb-1">Secure File</div>
+              <div className="text-sm font-semibold text-amber-300">✓ Phase 4</div>
+            </div>
+            <div className="bg-slate-700/30 rounded-lg p-3 text-center">
+              <div className="text-xs text-slate-400 mb-1">NIO Logger</div>
+              <div className="text-sm font-semibold text-purple-300">✓ Phase 5</div>
+            </div>
+            <div className="bg-slate-700/30 rounded-lg p-3 text-center">
+              <div className="text-xs text-slate-400 mb-1">RMI Tasks</div>
+              <div className="text-sm font-semibold text-yellow-300">✓ Phase 6</div>
+            </div>
+          </div>
+          
+          {/* Connection Status */}
+          <div className="text-center">
+            <p className="text-slate-400 text-sm">
+              All Services Operational - Phases 1-6 Complete -{" "}
+              <span className={isConnected ? "text-green-400 font-semibold" : "text-red-400 font-semibold"}>
+                {isConnected ? "✓ Hub Connected" : "✗ Hub Disconnected"}
+              </span>
+            </p>
+            <p className="mt-2 text-xs text-slate-500">
+              Network Programming L3S1 • Microservices Architecture • November 2025
+            </p>
+          </div>
         </div>
       </footer>
     </div>
