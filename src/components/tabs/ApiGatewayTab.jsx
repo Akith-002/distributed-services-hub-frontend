@@ -19,7 +19,7 @@ export default function ApiGatewayTab({ onSendCommand, isConnected }) {
   useEffect(() => {
     const handleServiceResult = (event) => {
       const msg = event.detail;
-      if (msg.result_from === "API_GATEWAY") {
+      if (msg.result_from === "ApiGateway") {
         try {
           const data = JSON.parse(msg.data);
           setWeatherData(data);
@@ -47,7 +47,7 @@ export default function ApiGatewayTab({ onSendCommand, isConnected }) {
 
     setLoading(true);
     setError(null);
-    onSendCommand("API_GATEWAY", "get-weather");
+    onSendCommand("ApiGateway", "get-weather");
 
     // Timeout after 10 seconds
     setTimeout(() => {
