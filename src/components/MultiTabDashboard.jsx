@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import ServiceRegistryTab from "./tabs/ServiceRegistryTab";
 import ApiGatewayTab from "./tabs/ApiGatewayTab";
-import SecurityTestTab from "./tabs/SecurityTestTab";
+import FileServiceTab from "./tabs/FileServiceTab";
 import NioLogStreamTab from "./tabs/NioLogStreamTab";
 import RmiTaskRunnerTab from "./tabs/RmiTaskRunnerTab";
 
@@ -64,7 +64,7 @@ export default function MultiTabDashboard() {
       heartbeatIntervalRef.current = setInterval(() => {
         if (ws.current && ws.current.readyState === WebSocket.OPEN) {
           try {
-            ws.current.send(JSON.stringify({ type: "PING" }));
+            ws.current.send(JSON.stringify({ command: "ping" }));
           } catch (err) {
             console.warn("Failed to send heartbeat:", err);
           }
@@ -115,7 +115,8 @@ export default function MultiTabDashboard() {
           break;
 
         case "PONG":
-          // Heartbeat response from server
+          // Heartbeat response from server - connection is alive
+          console.log("[WebSocket] Received PONG - connection alive");
           break;
 
         default:
@@ -187,11 +188,11 @@ export default function MultiTabDashboard() {
       description: "Member 2 - HttpURLConnection",
     },
     {
-      id: "security",
-      label: "Security Test",
+      id: "file-service",
+      label: "File Service",
       icon: Shield,
-      component: SecurityTestTab,
-      description: "Member 3 - JSSE & SSLServerSocket",
+      component: FileServiceTab,
+      description: "Secure file upload and download",
     },
     {
       id: "nio-logs",
